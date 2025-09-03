@@ -1,0 +1,181 @@
+---
+name: llm-desktop-assistant
+status: backlog
+created: 2025-09-03T07:06:46Z
+progress: 0%
+updated: 2025-09-03T07:44:20Z
+prd: .claude/prds/llm-desktop-assistant.md
+github: https://github.com/neomody77/llm-desktop-assistant/issues/1
+---
+
+# Epic: LLM Desktop Assistant
+
+## Overview
+
+Build a streamlined AI desktop assistant leveraging existing open-source components and modern APIs. Focus on rapid MVP delivery by integrating proven technologies rather than building from scratch, with a simplified architecture that prioritizes functionality over complexity.
+
+## Architecture Decisions
+
+### Core Simplifications
+- **Leverage Open-LLM-VTuber**: Fork and adapt existing codebase instead of building from scratch
+- **Electron + Python Backend**: Simple cross-platform solution with extensive libraries
+- **OpenAI-compatible APIs**: Use standard interfaces for all LLM providers (OpenAI, Anthropic via proxy, local models via Ollama)
+- **WebRTC for Voice**: Browser-native voice handling, no custom audio pipeline
+- **Live2D Web SDK**: Use web-based avatar rendering, avoid native integration complexity
+
+### Technology Stack
+- **Frontend**: Electron app with React (reuse Open-LLM-VTuber UI components)
+- **Backend**: FastAPI (Python) for simplicity and extensive library support
+- **Voice**: Web Speech API for STT, OpenAI/ElevenLabs API for TTS
+- **Avatar**: Live2D Cubism Web SDK with existing free models
+- **LLM**: LangChain for unified LLM interface and tool calling
+- **MCP**: Use existing `mcp` Python package for integration
+- **System Ops**: Python `subprocess` with sandboxing via `firejail` (Linux/Mac) or Windows Sandbox API
+
+### Design Patterns
+- **Plugin Architecture**: Simple Python plugin system using `importlib`
+- **Event-Driven**: Use `asyncio` for non-blocking operations
+- **Command Pattern**: All system operations as reversible commands
+- **Repository Pattern**: Abstract data storage (start with SQLite)
+
+## Technical Approach
+
+### Frontend Components (Adapt from Open-LLM-VTuber)
+- **Avatar Display**: Reuse Live2D component with emotion mappings
+- **Voice Controls**: Simple push-to-talk and voice activity detection
+- **Chat Interface**: Existing chat UI with command history
+- **Settings Panel**: API keys, model selection, voice preferences
+- **System Tray**: Minimal Electron tray for quick access
+
+### Backend Services
+- **LLM Service**: LangChain router for multi-provider support
+- **Voice Pipeline**: Simple STT → Process → TTS flow
+- **Command Executor**: Sandboxed subprocess runner with approval system
+- **MCP Gateway**: Bridge between LLM tools and MCP servers
+- **Plugin Manager**: Dynamic loading of Python plugins from `.plugins/` directory
+
+### Infrastructure (Simplified)
+- **Local-First**: SQLite database, file-based configuration
+- **Distribution**: Electron installer with embedded Python runtime
+- **Updates**: Simple GitHub releases with auto-updater
+- **Logs**: Rotating file logs with `loguru` library
+
+## Implementation Strategy
+
+### Development Phases
+1. **Fork & Adapt** (Week 1-2): Fork Open-LLM-VTuber, strip streaming features, add desktop focus
+2. **Core Integration** (Week 3-4): Integrate LangChain, add basic system operations
+3. **Voice & Avatar** (Week 5-6): Connect voice pipeline, ensure lip-sync works
+4. **MCP & Plugins** (Week 7-8): Add MCP support and plugin system
+5. **Polish & Package** (Week 9-12): Testing, packaging, documentation
+
+### Risk Mitigation
+- **Use proven components**: Reduce risk by leveraging existing solutions
+- **Sandbox all operations**: Prevent system damage via strict sandboxing
+- **Progressive permissions**: Start with read-only operations, gradually add write
+- **Community testing**: Release alpha/beta versions for feedback
+
+### Testing Approach
+- **Unit tests**: Python `pytest` for backend logic
+- **Integration tests**: Test LLM → Tool → System flow
+- **Security tests**: Verify sandboxing and permission checks
+- **User acceptance**: Community beta testing program
+
+## Task Breakdown Preview
+
+High-level task categories (10 tasks maximum):
+
+- [ ] **Task 1: Fork and Adapt Base** - Fork Open-LLM-VTuber, remove streaming, adapt for desktop use
+- [ ] **Task 2: LLM Integration** - Setup LangChain with multi-provider support and tool calling
+- [ ] **Task 3: Voice Pipeline** - Implement STT/TTS with voice activity detection
+- [ ] **Task 4: System Operations** - Add sandboxed file/process/network operations
+- [ ] **Task 5: MCP Integration** - Connect to MCP servers for extended capabilities
+- [ ] **Task 6: Avatar Emotions** - Map LLM responses to avatar expressions
+- [ ] **Task 7: Plugin System** - Create simple Python plugin architecture
+- [ ] **Task 8: Desktop UI** - Adapt UI for desktop assistant use case
+- [ ] **Task 9: Security Layer** - Implement permission system and operation approval
+- [ ] **Task 10: Package & Deploy** - Create installers for Win/Mac/Linux
+
+## Dependencies
+
+### External Service Dependencies
+- **GitHub**: Open-LLM-VTuber repository for base code
+- **OpenAI API**: For GPT models and Whisper
+- **ElevenLabs API**: For high-quality TTS (optional, OpenAI TTS as fallback)
+- **Live2D SDK**: Free web SDK license
+- **MCP Registry**: For discovering available MCP servers
+
+### Internal Team Dependencies
+- **Single Developer Focus**: All tasks can be completed by one developer
+- **Community Contributions**: Plugin development can be crowdsourced
+- **Optional**: Live2D artist for custom avatar (can use free models initially)
+
+## Success Criteria (Technical)
+
+### Performance Benchmarks
+- **Response Time**: < 1 second for local operations
+- **Voice Latency**: < 1.5 seconds round-trip
+- **Memory Usage**: < 500MB baseline
+- **CPU Usage**: < 5% idle, < 30% active
+
+### Quality Gates
+- **Test Coverage**: 70% backend code coverage
+- **Security**: Pass OWASP dependency check
+- **Accessibility**: Keyboard navigation support
+- **Cross-Platform**: Works on Win/Mac/Linux
+
+### Acceptance Criteria
+- Successfully execute 10 different system operations
+- Maintain conversation context for 30+ turns
+- Connect to at least 3 MCP servers
+- Support 2+ LLM providers
+- Voice interaction works reliably
+
+## Estimated Effort
+
+### Overall Timeline
+- **MVP**: 3 months (single developer)
+- **Full Features**: 6 months total
+- **Community Version**: 9 months
+
+### Resource Requirements
+- **Development**: 1 full-stack developer
+- **Testing**: Community beta testers
+- **Infrastructure**: Minimal (GitHub, PyPI, npm)
+
+### Critical Path Items
+1. Base fork and adaptation (Week 1-2)
+2. LLM integration (Week 3-4)
+3. Voice pipeline (Week 5-6)
+4. System operations (Week 7-8)
+
+## Optimization Opportunities
+
+### Leverage Existing Tools
+- **Use Ollama**: For local LLM support without custom implementation
+- **Electron Forge**: For simplified packaging and distribution
+- **GitHub Actions**: For CI/CD and automated releases
+- **Existing Live2D Models**: Start with free community models
+
+### Simplification Strategies
+- **Skip complex features initially**: No email integration in MVP
+- **Use web technologies**: Avoid native code where possible
+- **Standard protocols**: OpenAI API format for all LLMs
+- **Progressive enhancement**: Start simple, add features based on feedback
+
+## Tasks Created
+- [ ] #2 - Fork and Adapt Base (parallel: true)
+- [ ] #3 - LLM Integration (parallel: false)
+- [ ] #4 - Voice Pipeline (parallel: true)
+- [ ] #5 - System Operations - Add sandboxed file/process/network operations (parallel: true)
+- [ ] #6 - MCP Integration - Connect to MCP servers for extended capabilities (parallel: true)
+- [ ] #7 - Avatar Emotions - Map LLM responses to avatar expressions (parallel: true)
+- [ ] #8 - Plugin System (parallel: true)
+- [ ] #9 - Desktop UI (parallel: false)
+- [ ] #10 - Security Layer (parallel: false)
+- [ ] #11 - Package & Deploy (parallel: false)
+
+Total tasks: 10
+Parallel tasks: 6
+Sequential tasks: 4
+Estimated total effort: 25-35 days
